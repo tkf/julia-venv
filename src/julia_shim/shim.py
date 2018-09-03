@@ -1,17 +1,9 @@
-import os
-import sys
-
-from .core import Configuration
+from .core import start_repl
 
 
 def main(args=None):
-    if args is None:
-        args = sys.argv[1:]
-
-    config = Configuration.load()
-    command = config.make_command(args)
-    os.environ["PYTHON"] = sys.executable
-    os.execvp(command[0], command)
+    # TODO: handle arguments
+    start_repl()
 
 
 if __name__ == "__main__":

@@ -3,3 +3,5 @@ let venv_depot = joinpath(@__DIR__, "depot")
         pushfirst!(Base.DEPOT_PATH, venv_depot)
     end
 end
+
+import PyCall
