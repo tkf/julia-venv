@@ -1,4 +1,4 @@
-PROJECT = julia_shim
+PROJECT = julia_venv
 
 .PHONY: test clean clean-pycache inject-readme upload
 

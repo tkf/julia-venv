@@ -1,16 +1,16 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="julia-shim",
+    name="julia-venv",
     version="0.0.0",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    package_data={"julia_shim": ["*.jl"]},
+    package_data={"julia_venv": ["*.jl"]},
     author="Takafumi Arakaki",
     author_email="aka.tkf@gmail.com",
-    # url="https://github.com/tkf/julia-shim",
+    # url="https://github.com/tkf/julia-venv",
     license="MIT",  # SPDX short identifier
-    # description="julia-shim - THIS DOES WHAT",
+    # description="julia-venv - THIS DOES WHAT",
     long_description=open("README.rst").read(),
     # keywords="KEYWORD, KEYWORD, KEYWORD",
     classifiers=[
@@ -23,8 +23,8 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "julia = julia_shim.shim:main",
-            "julia-shim-manage = julia_shim.manage:main",
+            "julia = julia_venv.shim:main",
+            "julia-venv-manage = julia_venv.manage:main",
         ],
     },
     zip_safe=False,

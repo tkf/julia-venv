@@ -1,2 +1,2 @@
-julia-shim package
+julia-venv package
 ==================

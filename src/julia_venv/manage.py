@@ -1,5 +1,5 @@
 """
-Manage julia-shim.
+Manage julia-venv.
 """
 
 from __future__ import print_function
