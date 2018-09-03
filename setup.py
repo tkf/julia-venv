@@ -23,7 +23,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "julia = julia_venv.shim:main",
+            "julia-venv = julia_venv.shim:main",
             "julia-venv-manage = julia_venv.manage:main",
         ],
     },
