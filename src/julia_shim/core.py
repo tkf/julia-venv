@@ -55,7 +55,7 @@ class Configuration(object):
         return cls(path, **dct)
 
     def get_julia_executable(self):
-        if os.path.abspath(self.julia):
+        if os.path.isabs(self.julia):
             return self.julia
         return devirtualized_which(self.julia)
 
