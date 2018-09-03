@@ -168,7 +168,7 @@ def _init_pyjulia(config):
     jl = SimpleJulia()
     include(jl, os.path.join(here, "startup.jl"))
 
-    from julia import Julia
+    from julia.core import Julia
     return Julia(init_julia=False)
 
 
