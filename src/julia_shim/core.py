@@ -33,14 +33,12 @@ def devirtualized_which(command):
 
 class Configuration(object):
 
-    def __init__(self, path, julia="julia", arguments=[]):
+    def __init__(self, path, julia="julia"):
         self.julia = julia
-        self.arguments = arguments
 
     def as_dict(self):
         return dict(
             julia=self.julia,
-            arguments=self.arguments,
         )
 
     def dump(self):
@@ -60,16 +58,6 @@ class Configuration(object):
         if os.path.abspath(self.julia):
             return self.julia
         return devirtualized_which(self.julia)
-
-    def make_command(self, args=[]):
-        command = [self.get_julia_executable()]
-        command.extend([
-            "--load",
-            os.path.join(here, "startup.jl"),
-        ])
-        command.extend(self.arguments)
-        command.extend(args)
-        return command
 
 
 class LibJuliaInitializer(Singleton):

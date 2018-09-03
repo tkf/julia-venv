@@ -5,29 +5,18 @@ Manage julia-shim.
 from __future__ import print_function
 
 import pprint
-import shlex
 
 from .core import Configuration
 
 
-def cli_set_julia(julia, arguments):
+def cli_set_julia(julia):
     """
     Set `julia` executable to be used.
     """
     config = Configuration.load()
     config.julia = julia
-    config.arguments = arguments
     config.dump()
     print("Configuration written to", config.path)
-
-
-def cli_print_command(arguments):
-    """
-    Print command to be executed by the shim script.
-    """
-    config = Configuration.load()
-    command = config.make_command(arguments)
-    print(*map(shlex.quote, command), end="")
 
 
 def cli_show():
@@ -67,16 +56,6 @@ def make_parser(doc=__doc__):
     p.add_argument(
         "julia",
         help="Path or command name to be used.")
-    p.add_argument(
-        "arguments",
-        nargs="*",
-        help="Extra arguments to be passed to julia.")
-
-    p = subp("print-command", cli_print_command)
-    p.add_argument(
-        "arguments",
-        nargs="*",
-        help="Arguments to be passed to julia shim script.")
 
     p = subp("show", cli_show)
 
