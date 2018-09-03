@@ -1,4 +1,4 @@
-from ctypes import c_char_p, c_void_p
+from ctypes import POINTER, pointer, c_int, c_char_p, c_void_p, c_size_t
 from logging import getLogger
 import ctypes
 import json
@@ -64,7 +64,75 @@ class LibJuliaInitializer(Singleton):
 
     def __init__(self, config):
         self.config = config
-        self.libjulia = _init_libjulia(config)
+        self.load_libjulia(config)
+
+    _libjulia_loaded = False
+
+    def load_libjulia(self, config):
+        if self._libjulia_loaded:
+            return
+
+        from julia.core import juliainfo
+
+        runtime = config.get_julia_executable()
+        jlinfo = juliainfo(runtime)
+        BINDIR, libjulia_path, image_file = jlinfo[:3]
+        logger.debug("Base.Sys.BINDIR = %s", BINDIR)
+        logger.debug("libjulia_path = %s", libjulia_path)
+        if not os.path.exists(libjulia_path):
+            raise RuntimeError('Julia library ("libjulia") not found! {}'
+                               .format(libjulia_path))
+
+        self.julia_bindir = BINDIR.encode("utf-8")
+        self.image_file = image_file
+
+        # fixes a specific issue with python 2.7.13
+        # ctypes.windll.LoadLibrary refuses unicode argument
+        # http://bugs.python.org/issue29294
+        if (2, 7, 13) <= sys.version_info < (2, 7, 14):
+            libjulia_path = libjulia_path.encode("ascii")
+
+        libjulia = ctypes.PyDLL(libjulia_path, ctypes.RTLD_GLOBAL)
+        try:
+            jl_init_with_image = libjulia.jl_init_with_image
+        except AttributeError:
+            try:
+                jl_init_with_image = libjulia.jl_init_with_image__threading
+            except AttributeError:
+                raise RuntimeError(
+                    "No libjulia entrypoint found! (tried jl_init_with_image"
+                    " and jl_init_with_image__threading)")
+        jl_init_with_image.argtypes = [c_char_p, c_char_p]
+
+        self.jl_init_with_image = jl_init_with_image
+        self._libjulia = libjulia
+
+        self._libjulia_loaded = True
+
+    __libjulia_initialized = False
+
+    def init_libjulia(self):
+        """Ensure that libjulia is initialized only once."""
+        if self.__libjulia_initialized:
+            return
+
+        julia_bindir = self.julia_bindir
+        image_file = self.image_file
+        logger.debug("calling jl_init_with_image(%s, %s)",
+                     julia_bindir, image_file)
+        self.jl_init_with_image(julia_bindir, image_file.encode("utf-8"))
+        logger.debug("seems to work...")
+
+        self.__libjulia_initialized = True
+
+    @property
+    def uninitialized_libjulia(self):
+        return self._libjulia
+
+    @property
+    def libjulia(self):
+        self.init_libjulia()
+        return self._libjulia
 
 
 class PyJuliaInitializer(Singleton):
@@ -73,45 +141,6 @@ class PyJuliaInitializer(Singleton):
         self.config = config
         self.libjulia = LibJuliaInitializer.instance(config).libjulia
         self.julia = _init_pyjulia(config)
-
-
-def _init_libjulia(config):
-    from julia.core import juliainfo
-
-    runtime = config.get_julia_executable()
-    jlinfo = juliainfo(runtime)
-    BINDIR, libjulia_path, image_file = jlinfo[:3]
-    logger.debug("Base.Sys.BINDIR = %s", BINDIR)
-    logger.debug("libjulia_path = %s", libjulia_path)
-    if not os.path.exists(libjulia_path):
-        raise RuntimeError('Julia library ("libjulia") not found! {}'
-                           .format(libjulia_path))
-
-    # fixes a specific issue with python 2.7.13
-    # ctypes.windll.LoadLibrary refuses unicode argument
-    # http://bugs.python.org/issue29294
-    if (2, 7, 13) <= sys.version_info < (2, 7, 14):
-        libjulia_path = libjulia_path.encode("ascii")
-
-    julia_bindir = BINDIR.encode("utf-8")
-
-    libjulia = ctypes.PyDLL(libjulia_path, ctypes.RTLD_GLOBAL)
-    try:
-        jl_init_with_image = libjulia.jl_init_with_image
-    except AttributeError:
-        try:
-            jl_init_with_image = libjulia.jl_init_with_image__threading
-        except AttributeError:
-            raise RuntimeError(
-                "No libjulia entrypoint found! "
-                "(tried jl_init_with_image and jl_init_with_image__threading)")
-
-    jl_init_with_image.argtypes = [c_char_p, c_char_p]
-    logger.debug("calling jl_init_with_image(%s, %s)", julia_bindir, image_file)
-    jl_init_with_image(julia_bindir, image_file.encode("utf-8"))
-    logger.debug("seems to work...")
-
-    return libjulia
 
 
 class SimpleJulia(object):
@@ -128,6 +157,13 @@ class SimpleJulia(object):
         libjulia.jl_typeof_str.argtypes = [c_void_p]
         libjulia.jl_typeof_str.restype = c_char_p
         libjulia.jl_exception_clear.restype = None
+        libjulia.jl_parse_opts.argtypes = [POINTER(c_int),
+                                           POINTER(POINTER(c_char_p))]
+        libjulia.jl_pchar_to_string.argtypes = [c_char_p, c_size_t]
+        libjulia.jl_pchar_to_string.restype = c_void_p
+        libjulia.jl_call2.argtypes = [c_void_p] * 3
+        libjulia.jl_call2.restype = c_void_p
+
         libjulia.jl_exception_clear()
 
         self.libjulia = libjulia
@@ -167,6 +203,7 @@ def include(jl, path):
 def _init_pyjulia(config):
     jl = SimpleJulia()
     include(jl, os.path.join(here, "startup.jl"))
+    jl.eval("import PyCall")
 
     from julia.core import Julia
     return Julia(init_julia=False)
@@ -202,3 +239,47 @@ def start_repl(config=None, interactive=True,
         Base.eval(:(is_interactive = $was_interactive))
     end
     end""")(interactive, quiet, banner, history_file, color_set)
+
+
+def _append_strings(jl, dest, bytes_list):
+    assert isinstance(jl, SimpleJulia)
+    libjulia = jl.libjulia
+
+    jl_dest = jl.eval(dest)
+    jl_push = jl.eval("push!")
+    for chars in bytes_list:
+        jl_s = libjulia.jl_pchar_to_string(chars, len(chars))
+        libjulia.jl_call2(jl_push, jl_dest, jl_s)
+
+
+def exec_repl(args=[], config=None):
+    if config is None:
+        config = Configuration.load()
+
+    argv_list = list(args)
+    argv_list.insert(0, "julia-venv")  # will be ignored
+    logger.debug("argv_list = %r", argv_list)
+
+    # load libjulia but don't call jl_init_with_image yet:
+    libjulia = LibJuliaInitializer.instance(config).uninitialized_libjulia
+
+    libjulia.jl_parse_opts.argtypes = [POINTER(c_int),
+                                       POINTER(POINTER(c_char_p))]
+    argc = c_int(len(argv_list))
+    argv = POINTER(c_char_p)(
+        (c_char_p * len(argv_list))(*(a.encode("utf-8") for a in argv_list)))
+    libjulia.jl_parse_opts(pointer(argc), pointer(argv))
+    logger.debug("jl_parse_opts called")
+    logger.debug("argc = %r", argc)
+
+    n_ARGS = argc.value
+    ARGS = [argv[i] for i in range(n_ARGS)]
+    logger.debug("ARGS = %r", ARGS)
+
+    jl = _get_simplejulia(config)
+
+    # Copy ARGS here to Main.ARGS
+    jl.eval("empty!(ARGS)")
+    _append_strings(jl, "ARGS", ARGS)
+
+    include(jl, os.path.join(here, "exec_repl.jl"))
