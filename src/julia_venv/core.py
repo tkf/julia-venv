@@ -156,11 +156,11 @@ class SimpleJulia(object):
 def include(jl, path):
     if not os.path.exists(path):
         raise ValueError("{} does not exist".format(path))
-    if '"' in path:
+    if '"""' in path:
         raise NotImplementedError(
-            'Path containing " is not supported yet. Trying to include:\n',
+            'Path containing """ is not supported yet. Trying to include:\n',
             '{}'.format(path))
-    jl.eval("""Base.include(Main, "{}")""".format(path))
+    jl.eval('''Base.include(Main, """{}""")'''.format(path))
     # Note at this point, there is no `include` (`Main.include`).
 
 
