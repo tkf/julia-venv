@@ -19,6 +19,8 @@ logger = getLogger(__name__)
 here = os.path.dirname(os.path.abspath(__file__))
 default_path = os.path.join(here, "config.json")
 
+os.environ["JULIA_VENV_PYTHON"] = sys.executable
+
 
 def devirtualized_path(path=None):
     if path is None:

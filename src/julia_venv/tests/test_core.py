@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 
 import pytest
@@ -15,7 +17,7 @@ def test_depot_path(julia):
     [],
     ["a"],
     ["a", "b", "c"],
-    ["α", "β", "γ"],
+    [u"α", u"β", u"γ"],
 ])
 def test_append_strings(julia, strings):
     dest = "__test_append_strings"
