@@ -190,12 +190,13 @@ class SimpleJulia(object):
     def include(self, path):
         if not os.path.exists(path):
             raise ValueError("{} does not exist".format(path))
-        if '"""' in path:
-            raise NotImplementedError(
-                'Path containing """ is not supported yet. Trying to include:\n',
-                '{}'.format(path))
-        self.eval('''Base.include(Main, """{}""")'''.format(path))
-        # Note at this point, there is no `include` (`Main.include`).
+        include = self.eval("Base.include")
+        Main = self.eval("Main")
+        chars = path.encode("utf-8")
+        jl_str = self.libjulia.jl_pchar_to_string(chars, len(chars))
+        self.libjulia.jl_call2(include, Main, jl_str)
+        self.check_exception('''Base.include(Main, "{}")'''.format(path))
+        # Note: at this point, there is no `include` (`Main.include`).
 
 
 def _init_pyjulia(config):
