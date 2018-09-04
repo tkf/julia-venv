@@ -187,22 +187,20 @@ class SimpleJulia(object):
                 "Julia Exception {} occurred while evaluating:\n{}"
                 .format(exception, src))
 
-
-
-def include(jl, path):
-    if not os.path.exists(path):
-        raise ValueError("{} does not exist".format(path))
-    if '"""' in path:
-        raise NotImplementedError(
-            'Path containing """ is not supported yet. Trying to include:\n',
-            '{}'.format(path))
-    jl.eval('''Base.include(Main, """{}""")'''.format(path))
-    # Note at this point, there is no `include` (`Main.include`).
+    def include(self, path):
+        if not os.path.exists(path):
+            raise ValueError("{} does not exist".format(path))
+        if '"""' in path:
+            raise NotImplementedError(
+                'Path containing """ is not supported yet. Trying to include:\n',
+                '{}'.format(path))
+        self.eval('''Base.include(Main, """{}""")'''.format(path))
+        # Note at this point, there is no `include` (`Main.include`).
 
 
 def _init_pyjulia(config):
     jl = SimpleJulia()
-    include(jl, os.path.join(here, "startup.jl"))
+    jl.include(os.path.join(here, "startup.jl"))
     jl.eval("import PyCall")
 
     from julia.core import Julia
@@ -282,4 +280,4 @@ def exec_repl(args=[], config=None):
     jl.eval("empty!(ARGS)")
     _append_strings(jl, "ARGS", ARGS)
 
-    include(jl, os.path.join(here, "exec_repl.jl"))
+    jl.include(os.path.join(here, "exec_repl.jl"))
