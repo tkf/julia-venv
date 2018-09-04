@@ -304,6 +304,7 @@ def build_pycall(config):
     import subprocess
     from . import shim
     command = [sys.executable, "-m", shim.__name__,
+               "--color=yes",
                os.path.join(here, "build_pycall.jl")]
     julia = subprocess.Popen(command, stdin=subprocess.PIPE)
     try:
