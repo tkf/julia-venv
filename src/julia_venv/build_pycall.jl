@@ -18,7 +18,7 @@ let venv_depot = joinpath(@__DIR__, "depot")
         @eval Main begin
             import Pkg
             ENV["PYTHON"] = ENV["JULIA_VENV_PYTHON"]
-            Pkg.build("PyCall")
+            Pkg.add("PyCall")
             import PyCall
         end
     else
