@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import pprint
 
-from .core import Configuration, build_pycall
+from .core import Configuration, build_pycall, install_deps
 
 
 def cli_set_julia(julia):
@@ -27,6 +27,14 @@ def cli_build_pycall(if_required):
     if if_required and config.is_compatible_exe():
         return
     return build_pycall(config)
+
+
+def cli_install_deps():
+    """
+    Install dependencies
+    """
+    config = Configuration.load()
+    return install_deps(config)
 
 
 def cli_show():
@@ -66,6 +74,8 @@ def make_parser(doc=__doc__):
     p.add_argument(
         "julia",
         help="Path or command name to be used.")
+
+    p = subp("install-deps", cli_install_deps)
 
     p = subp("build-pycall", cli_build_pycall)
     p.add_argument(

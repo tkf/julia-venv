@@ -3,6 +3,7 @@ from logging import getLogger
 import ctypes
 import json
 import os
+import subprocess
 import sys
 
 from .utils import Singleton
@@ -300,13 +301,12 @@ def exec_repl(args=[], config=None):
     jl.include(os.path.join(here, "exec_repl.jl"))
 
 
-def build_pycall(config):
-    import subprocess
-    from . import shim
-    command = [sys.executable, "-m", shim.__name__,
-               "--color=yes",
-               "--startup-file=no",
-               os.path.join(here, "build_pycall.jl")]
+def run_install_script(config, julia_cmd):
+    command = list(julia_cmd) + [
+        "--color=yes",
+        "--startup-file=no",
+        os.path.join(here, "build_pycall.jl"),
+    ]
     julia = subprocess.Popen(command, stdin=subprocess.PIPE)
     try:
         while True:
@@ -314,3 +314,14 @@ def build_pycall(config):
     except IOError:
         pass
     return julia.wait()
+
+
+def build_pycall(config):
+    from . import shim
+    julia_cmd = [sys.executable, "-m", shim.__name__]
+    return run_install_script(config, julia_cmd)
+
+
+def install_deps(config):
+    julia_cmd = [config.get_julia_executable()]
+    return run_install_script(config, julia_cmd)
