@@ -1,6 +1,7 @@
 from ctypes import POINTER, pointer, c_int, c_char_p, c_void_p, c_size_t
 from logging import getLogger
 import ctypes
+import glob
 import json
 import os
 import subprocess
@@ -78,6 +79,23 @@ class Configuration(object):
         except ImportError:
             return False
         return is_compatible_exe(self.juliainfo())
+
+
+# TODO: At some point, it would be better for depot to be able to
+# configured per-Configuration basis.
+
+
+def depot_path(*parts):
+    return os.path.join(here, "depot", *parts)
+# See: [[./startup.jl::venv_depot]]
+
+
+def depot_glob(*parts):
+    return glob.glob(depot_path(*parts))
+
+
+def package_files(package, *parts):
+    return depot_glob("packages", package, "*", *parts)
 
 
 class LibJuliaInitializer(Singleton):
@@ -325,3 +343,17 @@ def build_pycall(config):
 def install_deps(config):
     julia_cmd = [config.get_julia_executable()]
     return run_install_script(config, julia_cmd)
+
+
+def print_deps_file(package, filename):
+    files = package_files(package, "deps", filename)
+    if files:
+        print("{}/*/deps/{} found.".format(package, filename))
+        for path in files:
+            print("At:", path)
+            print("Contents:")
+            with open(path) as file:
+                contents = file.read()
+            print(contents)
+    else:
+        print("No {}/*/deps/{} is found!".format(package, filename))

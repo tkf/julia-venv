@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import pprint
 
-from .core import Configuration, build_pycall, install_deps
+from .core import Configuration, build_pycall, install_deps, print_deps_file
 
 
 def cli_set_julia(julia):
@@ -42,7 +42,12 @@ def cli_show():
     Show current configuration.
     """
     config = Configuration.load()
+    print("Configuration:")
     pprint.pprint(config.as_dict())
+
+    print_deps_file("Conda", "build.log")
+    print_deps_file("PyCall", "build.log")
+    print_deps_file("PyCall", "deps.jl")
 
 
 def make_parser(doc=__doc__):
