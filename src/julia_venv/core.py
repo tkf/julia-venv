@@ -319,12 +319,13 @@ def exec_repl(args=[], config=None):
     jl.include(os.path.join(here, "exec_repl.jl"))
 
 
-def run_install_script(config, julia_cmd):
-    command = list(julia_cmd) + [
+def run_install_script(config, julia_cmd, args=[]):
+    command = julia_cmd + [
         "--color=yes",
         "--startup-file=no",
         os.path.join(here, "install_deps.jl"),
-    ]
+    ] + args
+    logger.debug("Executing: %r", command)
     julia = subprocess.Popen(command, stdin=subprocess.PIPE)
     try:
         while True:
@@ -334,15 +335,20 @@ def run_install_script(config, julia_cmd):
     return julia.wait()
 
 
-def rebuild_deps(config):
+def rebuild_deps(config, args=["build", "compile"]):
     from . import shim
     julia_cmd = [sys.executable, "-m", shim.__name__]
-    return run_install_script(config, julia_cmd)
+    logger.info("Building dependencies (%r)", args)
+    return run_install_script(config, julia_cmd, args)
 
 
 def install_deps(config):
     julia_cmd = [config.get_julia_executable()]
-    return run_install_script(config, julia_cmd)
+    logger.info("Installing dependencies")
+    retcode = run_install_script(config, julia_cmd, ["add"])
+    if retcode != 0:
+        return retcode
+    return rebuild_deps(config, ["compile"])
 
 
 def print_deps_file(package, filename):
