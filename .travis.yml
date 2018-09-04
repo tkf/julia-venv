@@ -1,0 +1,26 @@
+sudo: false
+language: python
+
+python:
+  - "2.7"
+  - "3.6"
+
+env:
+  global:
+    # Use the Python version specified by Travis inside tox:
+    - TOXENV=py
+
+before_install:
+  - pip install --quiet tox
+
+  # Install Julia:
+  - wget -O julia.tar.gz https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.0-linux-x86_64.tar.gz
+  - tar xf julia.tar.gz
+  - ln -T -s julia-*/ julia
+
+script:
+  - export PATH="${PWD}/julia/bin:${PATH}"
+  - tox
+
+notifications:
+  email: false
