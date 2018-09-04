@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import pprint
 
-from .core import Configuration
+from .core import Configuration, build_pycall
 
 
 def cli_set_julia(julia):
@@ -17,6 +17,16 @@ def cli_set_julia(julia):
     config.julia = julia
     config.dump()
     print("Configuration written to", config.path)
+
+
+def cli_build_pycall(if_required):
+    """
+    Build PyCall.jl
+    """
+    config = Configuration.load()
+    if if_required and config.is_compatible_exe():
+        return
+    return build_pycall(config)
 
 
 def cli_show():
@@ -56,6 +66,11 @@ def make_parser(doc=__doc__):
     p.add_argument(
         "julia",
         help="Path or command name to be used.")
+
+    p = subp("build-pycall", cli_build_pycall)
+    p.add_argument(
+        "--if-required", action="store_true",
+        help="Build PyCall.jl only if required.")
 
     p = subp("show", cli_show)
 

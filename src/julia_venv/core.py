@@ -61,6 +61,23 @@ class Configuration(object):
             return self.julia
         return devirtualized_which(self.julia)
 
+    def juliainfo(self):
+        try:
+            return self._juliainfo
+        except AttributeError:
+            pass
+
+        from julia.core import juliainfo
+        self._juliainfo = juliainfo(self.get_julia_executable())
+        return self._juliainfo
+
+    def is_compatible_exe(self):
+        try:
+            from julia.core import is_compatible_exe
+        except ImportError:
+            return False
+        return is_compatible_exe(self.juliainfo())
+
 
 class LibJuliaInitializer(Singleton):
 
@@ -74,10 +91,7 @@ class LibJuliaInitializer(Singleton):
         if self._libjulia_loaded:
             return
 
-        from julia.core import juliainfo
-
-        runtime = config.get_julia_executable()
-        jlinfo = juliainfo(runtime)
+        jlinfo = config.juliainfo()
         BINDIR, libjulia_path, image_file = jlinfo[:3]
         logger.debug("Base.Sys.BINDIR = %s", BINDIR)
         logger.debug("libjulia_path = %s", libjulia_path)
@@ -284,3 +298,17 @@ def exec_repl(args=[], config=None):
     _append_strings(jl, "ARGS", ARGS)
 
     jl.include(os.path.join(here, "exec_repl.jl"))
+
+
+def build_pycall(config):
+    import subprocess
+    from . import shim
+    command = [sys.executable, "-m", shim.__name__,
+               os.path.join(here, "build_pycall.jl")]
+    julia = subprocess.Popen(command, stdin=subprocess.PIPE)
+    try:
+        while True:
+            julia.stdin.write(b"\r\n")
+    except IOError:
+        pass
+    return julia.wait()
