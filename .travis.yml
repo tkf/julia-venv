@@ -36,7 +36,7 @@ before_install:
 
   - ~/miniconda/bin/conda create -q -n test python=$TRAVIS_PYTHON_VERSION pytest
   - CONDA_PIP="$HOME/miniconda/envs/test/bin/pip"
-  - $CONDA_PIP install 'https://github.com/tkf/pyjulia/archive/juliainfo.zip#egg=julia'
+  - $CONDA_PIP install 'https://github.com/JuliaPy/pyjulia/archive/master.zip#egg=julia'
   - $CONDA_PIP install .
 
 script:
