@@ -194,6 +194,7 @@ class SimpleJulia(object):
         libjulia.jl_exception_clear.restype = None
         libjulia.jl_parse_opts.argtypes = [POINTER(c_int),
                                            POINTER(POINTER(c_char_p))]
+        libjulia.jl_atexit_hook.argtypes = [c_int]
         libjulia.jl_pchar_to_string.argtypes = [c_char_p, c_size_t]
         libjulia.jl_pchar_to_string.restype = c_void_p
         libjulia.jl_call2.argtypes = [c_void_p] * 3
@@ -317,6 +318,7 @@ def exec_repl(args=[], config=None):
     _append_strings(jl, "ARGS", ARGS)
 
     jl.include(os.path.join(here, "exec_repl.jl"))
+    jl.libjulia.jl_atexit_hook(0)
 
 
 def run_install_script(config, julia_cmd, args=[]):
