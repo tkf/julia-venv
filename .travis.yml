@@ -34,7 +34,10 @@ before_install:
   # Useful for debugging any issues with conda
   - ~/miniconda/bin/conda info -a
 
-  - ~/miniconda/bin/conda create -q -n test python=$TRAVIS_PYTHON_VERSION pytest
+  - ~/miniconda/bin/conda create -q -n test
+      python=$TRAVIS_PYTHON_VERSION
+      pytest
+      matplotlib
   - CONDA_PIP="$HOME/miniconda/envs/test/bin/pip"
   - $CONDA_PIP install 'https://github.com/tkf/pyjulia/archive/juliainfo.zip#egg=julia'
   - $CONDA_PIP install .
