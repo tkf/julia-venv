@@ -334,7 +334,7 @@ def run_install_script(config, julia_cmd):
     return julia.wait()
 
 
-def build_pycall(config):
+def rebuild_deps(config):
     from . import shim
     julia_cmd = [sys.executable, "-m", shim.__name__]
     return run_install_script(config, julia_cmd)

@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import pprint
 
-from .core import Configuration, build_pycall, install_deps, print_deps_file
+from .core import Configuration, rebuild_deps, install_deps, print_deps_file
 
 
 def cli_set_julia(julia):
@@ -19,14 +19,14 @@ def cli_set_julia(julia):
     print("Configuration written to", config.path)
 
 
-def cli_build_pycall(if_required):
+def cli_rebuild_deps(if_required):
     """
     Build PyCall.jl
     """
     config = Configuration.load()
     if if_required and config.is_compatible_exe():
         return
-    return build_pycall(config)
+    return rebuild_deps(config)
 
 
 def cli_install_deps():
@@ -82,7 +82,7 @@ def make_parser(doc=__doc__):
 
     p = subp("install-deps", cli_install_deps)
 
-    p = subp("build-pycall", cli_build_pycall)
+    p = subp("build-pycall", cli_rebuild_deps)
     p.add_argument(
         "--if-required", action="store_true",
         help="Build PyCall.jl only if required.")
