@@ -323,7 +323,7 @@ def run_install_script(config, julia_cmd):
     command = list(julia_cmd) + [
         "--color=yes",
         "--startup-file=no",
-        os.path.join(here, "build_pycall.jl"),
+        os.path.join(here, "install_deps.jl"),
     ]
     julia = subprocess.Popen(command, stdin=subprocess.PIPE)
     try:
