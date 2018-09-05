@@ -22,6 +22,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 default_path = os.path.join(here, "config.json")
 
 os.environ["JULIA_VENV_PYTHON"] = sys.executable
+os.environ["PYTHON"] = sys.executable  # TODO: don't (?)
 
 
 def devirtualized_path(path=None):
