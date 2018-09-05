@@ -291,6 +291,8 @@ def exec_repl(args=[], config=None):
     if config is None:
         config = Configuration.load()
 
+    os.environ["PYTHON"] = sys.executable  # TODO: don't (?)
+
     argv_list = list(args)
     argv_list.insert(0, "julia-venv")  # will be ignored
     logger.debug("argv_list = %r", argv_list)
