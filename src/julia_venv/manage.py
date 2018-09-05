@@ -19,13 +19,11 @@ def cli_set_julia(julia):
     print("Configuration written to", config.path)
 
 
-def cli_rebuild_deps(if_required):
+def cli_rebuild_deps():
     """
-    Build PyCall.jl
+    Re-build PyCall.jl
     """
     config = Configuration.load()
-    if if_required and config.is_compatible_exe():
-        return
     return rebuild_deps(config)
 
 
@@ -83,9 +81,6 @@ def make_parser(doc=__doc__):
     p = subp("install-deps", cli_install_deps)
 
     p = subp("build-pycall", cli_rebuild_deps)
-    p.add_argument(
-        "--if-required", action="store_true",
-        help="Build PyCall.jl only if required.")
 
     p = subp("show", cli_show)
 
