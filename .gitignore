@@ -7,3 +7,6 @@
 /dist
 /doc/build
 /src/*.egg-info
+
+# Project specific:
+/src/julia_venv/depot
