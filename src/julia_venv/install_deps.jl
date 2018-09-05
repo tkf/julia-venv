@@ -46,22 +46,11 @@ let venv_depot = joinpath(@__DIR__, "depot")
                     rm(cache_files[1], force = true)
                 end
             end
-            @info "Compiling PyCall..."
-            bindir = Sys.BINDIR
-            exename = Base.julia_exename()
-            try
-                @eval Sys BINDIR = $(dirname(ENV["JULIA_VENV_PYTHON"]))
-                @eval Main begin
-                    Base.julia_exename() = "julia-venv"
-                    @info "Monkey patched julia_cmd() = $(Base.julia_cmd())"
-                    import PyCall
-                end
-            finally
-                @eval Sys BINDIR = $bindir
-                @eval Main begin
-                    Base.julia_exename() = $exename
-                end
-            end
+            @info """
+            Compiling PyCall with:
+            julia_cmd() = $(Base.julia_cmd())
+            """
+            @eval Main import PyCall
         else
             error("Unknown command $command")
         end

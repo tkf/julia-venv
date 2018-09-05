@@ -1,5 +1,11 @@
 if ! @isdefined __py_julia_venv_orig_DEPOT_PATH
     __py_julia_venv_orig_DEPOT_PATH = copy(Base.DEPOT_PATH)
+
+    __py_julia_venv_orig_BINDIR = Sys.BINDIR
+    __py_julia_venv_orig_julia_exename = Base.julia_exename()
+
+    @eval Sys BINDIR = $(dirname(ENV["JULIA_VENV_PYTHON"]))
+    @eval Main Base.julia_exename() = "julia-venv"
 end
 
 let venv_depot = joinpath(@__DIR__, "depot")
