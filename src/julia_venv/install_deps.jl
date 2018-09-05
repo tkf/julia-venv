@@ -58,6 +58,9 @@ let venv_depot = joinpath(@__DIR__, "depot")
                 end
             finally
                 @eval Sys BINDIR = $bindir
+                @eval Main begin
+                    Base.julia_exename() = $exename
+                end
             end
         else
             error("Unknown command $command")
