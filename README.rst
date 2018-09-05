@@ -26,7 +26,7 @@ Example usage
 
    virtualenv myenv
    source myenv/bin/activate
-   pip install https://github.com/tkf/pyjulia/archive/juliainfo.zip
+   pip install https://github.com/JuliaPy/pyjulia/archive/master.zip
    pip install https://github.com/tkf/julia-venv/archive/master.zip
    julia-venv-manage --help
    julia-venv-manage install-deps   # install PyCall.jl etc. to myenv
