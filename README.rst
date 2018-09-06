@@ -63,6 +63,37 @@ Once ``get_julia`` is called, PyJulia uses Julia runtime configured by
 '.../myenv/lib/python3.7/site-packages/julia_venv/depot/packages/PyCall/rUul9/src/PyCall.jl'
 
 
+Limitations (Important!)
+------------------------
+
+**TL;DR** Use ``JuliaVenv.add`` instead of ``Pkg.add`` inside ``julia-env``.
+Try ``JuliaVenv.precompile_package(package)`` if importing Julia ``package``
+results in suspicious failure.
+
+For example, from ``julia-venv`` REPL:
+
+.. code:: julia
+
+   julia> JuliaVenv.add("PyPlot")
+
+From Python REPL:
+
+>>> from julia_venv import get_julia
+>>> jl = get_julia()
+>>> from julia import JuliaVenv
+>>> JuliaVenv.add("PyPlot")
+
+Since ``julia-venv`` has to monkey-patch a few Julia internal
+functions to make module precompilation work, adding (or rather
+precompiling) modules which depend on PyCall.jl requires a special
+entry point (`JuliaEnv.add`).
+
+Precompilation is required not just after ``Pkg.add`` but also after
+other operations (e.g., ``]dev`` and ``]activate``).  Use
+``JuliaVenv.precompile_package(package)`` to manually trigger
+precompile of the package(s).
+
+
 How it works
 ------------
 
