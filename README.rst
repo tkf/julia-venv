@@ -70,18 +70,24 @@ Limitations (Important!)
 Try ``JuliaVenv.precompile_package(package)`` if importing Julia ``package``
 results in suspicious failure.
 
+(Note: `at the moment`__, you need to ``(pip|conda) install sympy``
+first to avoid the error from ``PyCall.anaconda_conda`` to run the
+following example.)
+
+__ https://github.com/JuliaPy/PyCall.jl/pull/559
+
 For example, from ``julia-venv`` REPL:
 
 .. code:: julia
 
-   julia> JuliaVenv.add("PyPlot")
+   julia> JuliaVenv.add("SymPy")
 
 From Python REPL:
 
 >>> from julia_venv import get_julia
 >>> jl = get_julia()
 >>> from julia import JuliaVenv
->>> JuliaVenv.add("PyPlot")
+>>> JuliaVenv.add("SymPy")
 
 Since ``julia-venv`` has to monkey-patch a few Julia internal
 functions to make module precompilation work, adding (or rather
