@@ -1,3 +1,13 @@
+** NOTE: julia-venv is now obsolete **
+======================================
+
+There has been a lot of improvements in PyJulia_.  Many points below
+are now obsolete.  See `Your Python interpreter is statically linked
+to libpython`_ in the PyJulia manual for the latest information.
+
+.. _`Your Python interpreter is statically linked to libpython`:
+   https://pyjulia.readthedocs.io/en/latest/troubleshooting.html#statically-linked
+
 Virtual Julia environments for PyJulia
 ======================================
 
